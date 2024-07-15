@@ -1396,6 +1396,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   aiChoiceText: {fileID: 1875864491}
+  ngramOrder: 2
+  currentWindowLength: 0
 --- !u!4 &1671887552
 Transform:
   m_ObjectHideFlags: 0

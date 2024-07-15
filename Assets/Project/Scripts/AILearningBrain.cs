@@ -21,56 +21,59 @@ public class AILearningBrain : MonoBehaviour
 
     public void AddInput(string input)
     {
-        _inputs.Add(input);
-
         ChooseMove();
+
+        _inputs.Add(input);        
     }
 
     private void ChooseMove()
     {
-        if(_inputs.Count >= 2)
-        {
-            if(_inputs.Count > currentWindowLength + 1)
-            {
-                ngramOrder++;
-            }
-        }
-
         NGram();
     }
 
     private void NGram()
     {
-        if(ngramOrder == 1)
+        if(ngramOrder == 1 || _inputs.Count < ngramOrder)
         {
             aiChoiceText.text = GetRandomMove();
         }
         else
         {
-            HashSet<string> possibleCombinations = new HashSet<string>();
+            currentWindowLength = ngramOrder - 1;
 
-            GenerateCombinations(_inputs, possibleCombinations, ngramOrder);
+            HashSet<string> possiblePatterns = new HashSet<string>();
 
-            Debug.Log(PrintCombinations(possibleCombinations));
+            GetInputPatterns(_inputs, possiblePatterns, ngramOrder);
+
+            Debug.Log(PrintPatterns(possiblePatterns));
 
             string window = GetWindowPattern();
 
-            string nextChoice = GetCorrectCombination(window, possibleCombinations);
+            string playerPattern = GetCorrectPattern(window, possiblePatterns);
 
-            Debug.Log($"PATTERN CHOSEN: {nextChoice}");
+            Debug.Log($"PATTERN CHOSEN: {playerPattern}");
 
-            if(string.IsNullOrEmpty(nextChoice))
+            if (string.IsNullOrEmpty(playerPattern))
             {
+                aiChoiceText.text = GetRandomMove();
                 return;
             }
 
-            aiChoiceText.text = nextChoice[nextChoice.Length - 1].ToString();
+            string aiMove = GetNextMove(playerPattern);
+
+            if (string.IsNullOrEmpty(aiMove))
+            {
+                aiChoiceText.text = GetRandomMove();
+                return;
+            }
+
+            aiChoiceText.text = aiMove;
         }       
     }
 
     private string GetRandomMove()
     {
-        float randomNumber = UnityEngine.Random.Range(0, 1);
+        float randomNumber = UnityEngine.Random.Range(0f, 1f);
 
         if(randomNumber <= 0.33f)
         {
@@ -100,33 +103,52 @@ public class AILearningBrain : MonoBehaviour
         return s;
     }
 
-    private string GetCorrectCombination(string window, HashSet<string> possibleCombinations)
+    private string GetCorrectPattern(string window, HashSet<string> possiblePatterns)
     {
-        foreach(string combination in possibleCombinations)
+        foreach(string pattern in possiblePatterns)
         {
-            if(combination.Substring(0, window.Length) == window)
+            if(pattern.Substring(0, window.Length) == window)
             {
-                return combination;
+                return pattern;
             }
         }
         return "";
     }
 
-    private static void GenerateCombinations(List<string> items, HashSet<string> possibleCombinations, int length, string current = "", int start = 0)
+    private static void GetInputPatterns(List<string> inputs, HashSet<string> possiblePatterns, int ngramLength)
     {
-        if (current.Length == length)
+        for(int i = 0; i <= inputs.Count - ngramLength; i++)
         {
-            possibleCombinations.Add(current);
-            return;
-        }
+            var pattern = inputs.GetRange(i, ngramLength);
+            var stringPattern = "";
 
-        for (int i = 0; i < items.Count; i++)
-        {
-            GenerateCombinations(items, possibleCombinations, length, current + items[i], i + 1);
+            foreach (var c in pattern)
+            {
+                stringPattern += c;
+            }
+
+            possiblePatterns.Add(stringPattern);
         }
     }
 
-    private string PrintCombinations(HashSet<string> inputs)
+    private static string GetNextMove(string playerPattern)
+    {
+        string playerNextMove = playerPattern[playerPattern.Length - 1].ToString();
+
+        switch (playerNextMove) 
+        {
+            case "R":
+                return "P";
+            case "P": 
+                return "S";
+            case "S":
+                return "R";
+        }
+
+        return "";
+    }
+
+    private string PrintPatterns(HashSet<string> inputs)
     {
         string s = "{";
 
