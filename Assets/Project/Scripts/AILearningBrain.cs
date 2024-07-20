@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -41,7 +42,7 @@ public class AILearningBrain : MonoBehaviour
         {
             currentWindowLength = ngramOrder - 1;
 
-            HashSet<string> possiblePatterns = new HashSet<string>();
+            List<string> possiblePatterns = new List<string>();
 
             GetInputPatterns(_inputs, possiblePatterns, ngramOrder);
 
@@ -103,19 +104,33 @@ public class AILearningBrain : MonoBehaviour
         return s;
     }
 
-    private string GetCorrectPattern(string window, HashSet<string> possiblePatterns)
+    private string GetCorrectPattern(string window, List<string> possiblePatterns)
     {
+        List<string> correctPatterns = new List<string>();
+
         foreach(string pattern in possiblePatterns)
         {
             if(pattern.Substring(0, window.Length) == window)
             {
-                return pattern;
+                correctPatterns.Add(pattern);
             }
         }
-        return "";
+
+        if(correctPatterns.Count > 0)
+        {
+            var correctPattern = correctPatterns.GroupBy(x => x)
+                                                .OrderByDescending(x => x.Count())
+                                                .FirstOrDefault().Key;
+
+            return correctPattern;
+        }
+        else
+        {
+            return "";
+        }        
     }
 
-    private static void GetInputPatterns(List<string> inputs, HashSet<string> possiblePatterns, int ngramLength)
+    private static void GetInputPatterns(List<string> inputs, List<string> possiblePatterns, int ngramLength)
     {
         for(int i = 0; i <= inputs.Count - ngramLength; i++)
         {
@@ -148,7 +163,7 @@ public class AILearningBrain : MonoBehaviour
         return "";
     }
 
-    private string PrintPatterns(HashSet<string> inputs)
+    private string PrintPatterns(List<string> inputs)
     {
         string s = "{";
 
