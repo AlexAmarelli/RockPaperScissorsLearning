@@ -496,7 +496,7 @@ MonoBehaviour:
   generationPanel: {fileID: 2139742316}
   selectionPanel: {fileID: 1024899399}
   elementPrefab: {fileID: 3816132045369817858, guid: 36fa0fb5ddb1d614785d9ab68c655f0c, type: 3}
-  generatedElementsCount: 6
+  generatedElementsCount: 10
   generationSettings:
   - GroupSize: 0.1
     MinMutation: 0.35

@@ -94,6 +94,11 @@ public class EvolutionBrain : MonoBehaviour
             var genSetting = generationSettings[i];
             int size = (int)(generatedElementsCount * genSetting.GroupSize);
 
+            if(size <= 0)
+            {
+                size = 1;
+            }
+
             for(int j = 0; j < size; j++)
             {
                 List<Gene> generatedElementGenes = new List<Gene>();
